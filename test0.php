@@ -16,22 +16,50 @@ echo "pass: {$pass}".PHP_EOL;
 $maxConnections  = 2;
 $connections     = [];
 $dataMultiplier  = 10;
+$childs = [];
+$time = microtime(true);
+/**
+ * @param $link
+ */
+function closeConnection($link)
+{
+    ob_start();
+    var_dump($link);
+    $resourceId = trim(ob_get_clean());
+    echo sprintf("[%s] Closed connection %s" . PHP_EOL, date('H:i:s'), $resourceId);
+    mysql_close($link);
+}
 
+
+
+$tickDelay = 0;
 while (true)
 {
-    // make connections till MaxConnections
-    while (count($connections) < $maxConnections) {
-        $connections[] = createConnection($host, $user, $pass);
-    }
+    $tickStep = (1 - $tickDelay);
+    if ($time + $tickStep <= microtime(true)) {
+        $childs = [];
+        echo sprintf("[%s] tick %s   connections/s: %s" . PHP_EOL, date('H:i:s'), $tickStep, (1 / $tickStep) * $maxConnections);
 
-    // Fetch data for each made connection
-    foreach ($connections as $connection) {
-        fetchData($connection, $dataMultiplier);
+        while (count($childs) < $maxConnections) {
+            $pid = pcntl_fork();
+
+            if ($pid === 0) {
+                $connections[] = 'henk';
+                $link = createConnection($host, $user, $pass);
+                fetchData($link, $dataMultiplier);
+                usleep(10000);
+                closeConnection($link);
+                die();
+            } else {
+                $childs[] = $pid;
+            }
+        }
+
+        $time = microtime(true);
     }
 
     stream_set_blocking(STDIN, false);
     $input = trim(fgets(STDIN));
-
 
     if ($input !== false && $input == '+') {
         $dataMultiplier += 10;
@@ -42,22 +70,19 @@ while (true)
         if ($dataMultiplier < 0) $dataMultiplier = 1;
         echo "Decreased data multiplier $dataMultiplier".PHP_EOL;
     }
+    if ($input !== false && $input == '[') {
+        $tickDelay += 0.100;
+        echo "Increased delay $tickDelay".PHP_EOL;
+    }
+    if ($input !== false && $input ==']') {
+        $tickDelay -= 0.100;
+        if ($tickDelay < 0) $tickDelay = 0;
+        echo "Decreased delay $tickDelay".PHP_EOL;
+    }
     if ($input !== false && $input > 0) {
         echo "Setting max connections $maxConnections to {$input}".PHP_EOL;
         $maxConnections = (int) $input;
     }
-    usleep(10000);
-    // Close all connections
-    while (count($connections) > 0) {
-        $link = array_shift($connections);
-        ob_start();
-        var_dump($link);
-        $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s] Closed connection %s".PHP_EOL, date('H:i:s'), $resourceId);
-        mysql_close($link);
-    }
-
-
 }
 
 

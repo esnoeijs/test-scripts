@@ -37,7 +37,7 @@ while (true)
         echo "Setting max connections $maxConnections to {$input}".PHP_EOL;
         $maxConnections = (int) $input;
     }
-
+    usleep(1000000);
     // Close all connections
     while (count($connections) > 0) {
         $link = array_shift($connections);
@@ -48,7 +48,7 @@ while (true)
         mysql_close($link);
     }
 
-    usleep(1000000);
+
 }
 
 

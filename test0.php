@@ -44,7 +44,7 @@ while (true)
         ob_start();
         var_dump($link);
         $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s] Closed connection %s".PHP_EOL, date('H:i'), $resourceId);
+        echo sprintf("[%s] Closed connection %s".PHP_EOL, date('H:i:s'), $resourceId);
         mysql_close($link);
     }
 
@@ -59,12 +59,12 @@ function createConnection($host, $user, $pass)
     $diff  = microtime(true) - $start;
 
     if (!$link) {
-        echo sprintf("[%s][%f0] Could not connect %s".PHP_EOL, date('H:i'), $diff, mysql_error());
+        echo sprintf("[%s][%f0] Could not connect %s".PHP_EOL, date('H:i:s'), $diff, mysql_error());
     } else {
         ob_start();
         var_dump($link);
         $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s][%f0] Connected %s".PHP_EOL, date('H:i'), $diff, $resourceId);
+        echo sprintf("[%s][%f0] Connected %s".PHP_EOL, date('H:i:s'), $diff, $resourceId);
     }
 
     return $link;
@@ -81,11 +81,11 @@ function fetchData($connection)
     $diff     = microtime(true) - $start;
 
     if (!$resource) {
-        echo sprintf("[%s][%f0] error %s".PHP_EOL, date('H:i'), $diff, mysql_error());
+        echo sprintf("[%s][%f0] error %s".PHP_EOL, date('H:i:s'), $diff, mysql_error());
     } else {
         ob_start();
         var_dump($connection);
         $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s][%f0] got data %s  length: %s data: %s".PHP_EOL, date('H:i'), $diff, $resourceId,  strlen($data['data']), substr($data['data'], 0, 16));
+        echo sprintf("[%s][%f0] got data %s  length: %s data: %s".PHP_EOL, date('H:i:s'), $diff, $resourceId,  strlen($data['data']), substr($data['data'], 0, 16));
     }
 }

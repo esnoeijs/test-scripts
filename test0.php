@@ -76,7 +76,7 @@ function createConnection($host, $user, $pass)
 function fetchData($connection)
 {
     $start    = microtime(true);
-    $resource = mysql_query("SELECT REPEAT(md5(floor(rand() * 10)), 1024) as data;", $connection);
+    $resource = mysql_query("SELECT REPEAT(md5(floor(rand() * 10)), 1024 * 10) as data;", $connection);
     $data     = mysql_fetch_assoc($resource);
     $diff     = microtime(true) - $start;
 

@@ -30,7 +30,7 @@ while (true)
     $tickStep = (1 - $tickDelay);
     if ($time + $tickStep <= microtime(true)) {
         $childs = [];
-        echo sprintf("[%s] tick %s   connections/s: %s" . PHP_EOL, date('H:i:s'), $tickStep, (1 / $tickStep) * $maxConnections);
+        echo sprintf("[%s] tick %s  conn: %s connections/s: %s" . PHP_EOL, date('H:i:s'), $tickStep, $maxConnections, (1 / $tickStep) * $maxConnections);
 
         while (count($childs) < $maxConnections) {
             $pid = pcntl_fork();

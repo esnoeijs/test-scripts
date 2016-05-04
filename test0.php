@@ -35,6 +35,8 @@ function closeConnection($link)
 $tickDelay = 0;
 while (true)
 {
+    ini_set('mysql.connect_timeout','5');
+
     $tickStep = (1 - $tickDelay);
     if ($time + $tickStep <= microtime(true)) {
         $childs = [];

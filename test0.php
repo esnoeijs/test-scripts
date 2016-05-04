@@ -45,7 +45,7 @@ while (true)
         var_dump($link);
         $resourceId = trim(ob_get_clean());
         echo sprintf("[%s] Closed connection %s".PHP_EOL, date('H:i'), $resourceId);
-        mysql_close($connections);
+        mysql_close($link);
     }
 
     usleep(1000000);

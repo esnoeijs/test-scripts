@@ -18,17 +18,7 @@ $connections     = [];
 $dataMultiplier  = 10;
 $childs = [];
 $time = microtime(true);
-/**
- * @param $link
- */
-function closeConnection($link)
-{
-    ob_start();
-    var_dump($link);
-    $resourceId = trim(ob_get_clean());
-    echo sprintf("[%s] Closed connection %s" . PHP_EOL, date('H:i:s'), $resourceId);
-    mysql_close($link);
-}
+
 
 
 
@@ -47,18 +37,16 @@ while (true)
 
             if ($pid === 0) {
 
-                usleep(0.10 * rand(0, 10));
+                usleep(1000 * rand(0, 10));
                 $link = createConnection($host, $user, $pass);
                 fetchData($link, $dataMultiplier);
-                usleep(1000000);
+                usleep(10000 * rand(0, 100));
                 closeConnection($link);
                 die();
             } else {
                 $childs[] = $pid;
             }
         }
-
-
 
         foreach ($childs as $child) {
             pcntl_wait($status);
@@ -106,7 +94,7 @@ function createConnection($host, $user, $pass)
         ob_start();
         var_dump($link);
         $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s][%f0] Connected %s MySQL %s".PHP_EOL, date('H:i:s'), $diff, $resourceId, mysql_thread_id($link));
+//        echo sprintf("[%s][%f0] Connected %s MySQL %s".PHP_EOL, date('H:i:s'), $diff, $resourceId, mysql_thread_id($link));
     }
 
     return $link;
@@ -128,6 +116,18 @@ function fetchData($connection, $dataMultiplier)
         ob_start();
         var_dump($connection);
         $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s][%f0] got data %s  length: %s data: %s".PHP_EOL, date('H:i:s'), $diff, $resourceId,  strlen($data['data']), substr($data['data'], 0, 16));
+//        echo sprintf("[%s][%f0] got data %s  length: %s data: %s".PHP_EOL, date('H:i:s'), $diff, $resourceId,  strlen($data['data']), substr($data['data'], 0, 16));
     }
+}
+
+/**
+ * @param $link
+ */
+function closeConnection($link)
+{
+    ob_start();
+    var_dump($link);
+    $resourceId = trim(ob_get_clean());
+//    echo sprintf("[%s] Closed connection %s" . PHP_EOL, date('H:i:s'), $resourceId);
+    mysql_close($link);
 }

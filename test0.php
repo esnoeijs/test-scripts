@@ -94,12 +94,12 @@ function createConnection($host, $user, $pass)
     $diff  = microtime(true) - $start;
 
     if (!$link) {
-        echo sprintf("[%s][%f0] Could not connect %s".PHP_EOL, date('H:i:s'), $diff, mysql_error());
+        echo sprintf("[%s][%f0] Could not connect %s  MySQL %s".PHP_EOL, date('H:i:s'), $diff, mysql_error(), mysql_thread_id($link));
     } else {
         ob_start();
         var_dump($link);
         $resourceId = trim(ob_get_clean());
-        echo sprintf("[%s][%f0] Connected %s".PHP_EOL, date('H:i:s'), $diff, $resourceId);
+        echo sprintf("[%s][%f0] Connected %s MySQL %s".PHP_EOL, date('H:i:s'), $diff, $resourceId, mysql_thread_id($link));
     }
 
     return $link;

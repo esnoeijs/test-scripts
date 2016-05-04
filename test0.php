@@ -7,10 +7,12 @@ array_shift($args);
 $host = array_shift($args);
 $user = array_shift($args);
 $pass = array_shift($args);
+$db   = array_shift($args);
 
 echo "host: {$host}".PHP_EOL;
 echo "user: {$user}".PHP_EOL;
 echo "pass: {$pass}".PHP_EOL;
+echo "db: {$db}".PHP_EOL;
 
 
 $maxConnections  = 2;
@@ -20,7 +22,12 @@ $childs = [];
 $time = microtime(true);
 
 
+if (!file_exists('queries.sql')) {
+    echo "need queries.sql with queries".PHP_EOL;
+    die();
+}
 
+$queries = file('queries.sql');
 
 $tickDelay = 0;
 while (true)
@@ -38,8 +45,8 @@ while (true)
             if ($pid === 0) {
 
                 usleep(1000 * rand(0, 10));
-                $link = createConnection($host, $user, $pass);
-                fetchData($link, $dataMultiplier);
+                $link = createConnection($host, $user, $pass, $db);
+                fetchData($link, $dataMultiplier, getQuery($queries));
                 usleep(10000 * rand(0, 100));
                 closeConnection($link);
                 die();
@@ -82,7 +89,7 @@ while (true)
 }
 
 
-function createConnection($host, $user, $pass)
+function createConnection($host, $user, $pass, $db)
 {
     $start = microtime(true);
     $link  = mysql_connect($host, $user, $pass, true);
@@ -91,6 +98,7 @@ function createConnection($host, $user, $pass)
     if (!$link) {
         echo sprintf("[%s][%f0] Could not connect %s  MySQL %s".PHP_EOL, date('H:i:s'), $diff, mysql_error(), mysql_thread_id($link));
     } else {
+        mysql_select_db($db);
         ob_start();
         var_dump($link);
         $resourceId = trim(ob_get_clean());
@@ -103,16 +111,16 @@ function createConnection($host, $user, $pass)
 /**
  * @param $connection
  */
-function fetchData($connection, $dataMultiplier)
+function fetchData($connection, $dataMultiplier, $query)
 {
     $start    = microtime(true);
-    $resource = mysql_query("SELECT REPEAT(md5(floor(rand() * 10)), 1024 * {$dataMultiplier}) as data;", $connection);
-    $data     = mysql_fetch_assoc($resource);
+    $resource = mysql_query($query);
     $diff     = microtime(true) - $start;
 
     if (!$resource) {
         echo sprintf("[%s][%f0] error %s".PHP_EOL, date('H:i:s'), $diff, mysql_error());
     } else {
+        $data     = mysql_fetch_assoc($resource);
         ob_start();
         var_dump($connection);
         $resourceId = trim(ob_get_clean());
@@ -130,4 +138,11 @@ function closeConnection($link)
     $resourceId = trim(ob_get_clean());
 //    echo sprintf("[%s] Closed connection %s" . PHP_EOL, date('H:i:s'), $resourceId);
     mysql_close($link);
+}
+
+
+function getQuery($queries)
+{
+    $count = count($queries);
+    return $queries[rand(0, $count-1)];
 }

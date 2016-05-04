@@ -15,7 +15,7 @@ echo "pass: {$pass}".PHP_EOL;
 
 $maxConnections  = 2;
 $connections     = [];
-
+$dataMultiplier  = 10;
 
 while (true)
 {
@@ -26,18 +26,27 @@ while (true)
 
     // Fetch data for each made connection
     foreach ($connections as $connection) {
-        fetchData($connection);
+        fetchData($connection, $dataMultiplier);
     }
 
     stream_set_blocking(STDIN, false);
-    $input = fgets(STDIN);
+    $input = trim(fgets(STDIN));
 
 
-    if ($input !== false && $input >= 0) {
+    if ($input !== false && $input == '+') {
+        $dataMultiplier += 10;
+        echo "Increased data multiplier $dataMultiplier".PHP_EOL;
+    }
+    if ($input !== false && $input == '-') {
+        $dataMultiplier -= 10;
+        if ($dataMultiplier < 0) $dataMultiplier = 1;
+        echo "Decreased data multiplier $dataMultiplier".PHP_EOL;
+    }
+    if ($input !== false && $input > 0) {
         echo "Setting max connections $maxConnections to {$input}".PHP_EOL;
         $maxConnections = (int) $input;
     }
-    usleep(10000);
+    usleep(1000000);
     // Close all connections
     while (count($connections) > 0) {
         $link = array_shift($connections);
@@ -73,10 +82,10 @@ function createConnection($host, $user, $pass)
 /**
  * @param $connection
  */
-function fetchData($connection)
+function fetchData($connection, $dataMultiplier)
 {
     $start    = microtime(true);
-    $resource = mysql_query("SELECT REPEAT(md5(floor(rand() * 10)), 1024 * 10) as data;", $connection);
+    $resource = mysql_query("SELECT REPEAT(md5(floor(rand() * 10)), 1024 * {$dataMultiplier}) as data;", $connection);
     $data     = mysql_fetch_assoc($resource);
     $diff     = microtime(true) - $start;
 

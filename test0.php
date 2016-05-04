@@ -56,6 +56,11 @@ while (true)
             }
         }
 
+
+
+        foreach ($childs as $child) {
+            pcntl_wait($status);
+        }
         $time = microtime(true);
     }
 

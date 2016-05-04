@@ -44,7 +44,8 @@ while (true)
             $pid = pcntl_fork();
 
             if ($pid === 0) {
-                $connections[] = 'henk';
+
+                usleep(0.10 * rand(0, 10));
                 $link = createConnection($host, $user, $pass);
                 fetchData($link, $dataMultiplier);
                 usleep(10000);
